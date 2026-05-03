@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VisitaFácil ACS</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#eef2f7}
+
+.primary{background:#007bff;color:#fff}
+.success{background:#28a745;color:#fff}
+.danger{background:#dc3545;color:#fff}
+.secondary{background:#6c757d;color:#fff}
+
+.banner{
+ width:100%;
+ max-height:80px;
+ object-fit:contain;
+ background:#fff;
+ padding:6px;
+ border-radius:10px;
+ box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+.row{
+ display:flex;
+ gap:8px;
+}
+
+.row input{
+ flex:1;
+}
+
+/* TELAS */
+/* ATIVAÇÃO (caixa centralizada) */
+#ativacao{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#007bff,#28a745);
+z-index:9999;
+}
+
+button{
+ background:#007bff;
+ color:#fff;
+}
+
+/* ABERTURA (layout vertical bonito) */
+#abertura{
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+background:linear-gradient(135deg,#007bff,#28a745);
+z-index:9999;
+padding:20px;
+color:#fff;
+text-align:center;
+gap:10px;
+}
+
+#abertura input{
+width:100%;
+max-width:300px;
+padding:10px;
+border-radius:8px;
+border:none;
+}
+
+#abertura button{
+width:100%;
+max-width:300px;
+padding:12px;
+border-radius:10px;
+border:none;
+background:#000;
+color:#fff;
+}
+
+/* CAIXA INTERNA (resolve layout feio) */
+.box{
+background:#ffffff;
+color:#333;
+padding:20px;
+border-radius:15px;
+width:100%;
+max-width:320px;
+box-shadow:0 5px 20px rgba(0,0,0,0.2);
+}
+
+/* inputs mais bonitos */
+.box input{
+width:100%;
+padding:10px;
+margin-top:8px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+/* botão bonito */
+.box button{
+width:100%;
+padding:12px;
+margin-top:12px;
+border:none;
+border-radius:10px;
+background:#007bff;
+color:#fff;
+font-weight:bold;
+cursor:pointer;
+}
+
+.box button:hover{
+background:#0056b3;
+}
+
+/* HEADER */
+.header{
+position:sticky;top:0;background:#007bff;color:#fff;padding:10px;font-size:12px;text-align:center;
+}
+
+/* CONTEÚDO */
+.container{padding:15px;margin-bottom:80px}
+.card{background:#fff;padding:15px;border-radius:12px;margin-bottom:12px}
+.row{display:flex;gap:5px}
+
+/* MENU */
+.bottom-nav{
+position:fixed;bottom:0;width:100%;display:flex;background:#000;
+}
+.bottom-nav button{flex:1;color:#fff;background:none}
+
+/* ASSINATURA */
+#assinaturaTela{
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+ background:#f8f9fa;
+ display:none;
+ flex-direction:column;
+ justify-content:center;
+ align-items:center;
+ z-index:99999;
+ padding:15px;
+}
+
+.canvas-container{
+ width:100%;
+ max-width:500px;
+ height:250px;
+ background:#fff;
+ border:2px dashed #aaa;
+ border-radius:10px;
+}
+
+#canvas{
+ width:100%;
+ height:100%;
+}
+
+.assinatura-botoes{
+ width:100%;
+ max-width:500px;
+ display:flex;
+ gap:5px;
+ margin-top:10px;
+}
+
+.assinatura-botoes button{
+ flex:1;
+}
+
+/* ===== CORREÇÃO DO FORM ===== */
+#formTela{
+ display:block;
+}
+
+#formTela .container{
+ max-width:600px;
+ margin:auto;
+}
+
+/* organiza os campos */
+#formTela input,
+#formTela textarea,
+#formTela select{
+ width:100%;
+ padding:10px;
+ margin:8px 0;
+ border-radius:8px;
+ border:1px solid #ccc;
+ box-sizing:border-box;
+}
+
+/* botões organizados */
+#formTela button{
+ width:100%;
+ padding:12px;
+ margin-top:8px;
+ border-radius:10px;
+ border:none;
+ font-weight:bold;
+}
+
+/* espaço entre blocos */
+#formTela h2{
+ margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ATIVAÇÃO -->
+<div id="ativacao">
+<div class="box">
+
+<h2>🔐 Ativação</h2>
+
+<p style="font-size:12px;">ID do aparelho:</p>
+<b id="deviceId" style="font-size:12px;word-break:break-all;"></b>
+
+<input id="codigo" placeholder="Código de ativação">
+
+<button onclick="ativar()">Ativar</button>
+
+</div>
+</div>
+
+<!-- ABERTURA -->
+<div id="abertura" style="display:none;">
+<img src="logo.png" width="200">
+
+<input id="ubs" placeholder="Nome da UBS">
+<input id="acs" placeholder="Nome do ACS">
+<input id="micro" placeholder="Micro área">
+
+<button onclick="abrirSistema()">Entrar no Sistema</button>
+</div>
+
+<!-- HEADER -->
+<div class="header" id="headerInfo" style="display:none;"></div>
+
+<!-- FORM -->
+<div class="container" id="formTela" style="display:none;">
+<img src="logo-horizontal.png" class="banner">
+<h2>📋 Visita Domiciliar</h2>
+
+<button class="secondary" onclick="limparFormulario()">🆕 Nova Visita</button>
+
+<input id="datetime" readonly>
+
+<input id="cep" placeholder="CEP">
+<button class="secondary" onclick="buscarCEP()">Buscar CEP</button>
+
+<input id="endereco" placeholder="Endereço">
+
+<div class="row">
+<input id="numero" placeholder="Número">
+<input id="complemento" placeholder="Complemento">
+</div>
+
+<input id="responsavel" placeholder="Responsável">
+
+<div id="membros"></div>
+<button class="secondary" onclick="addMembro()">+ Membro</button>
+
+<select id="motivo">
+<option value="">Motivo</option>
+<option>Periódica</option>
+<option>Busca Ativa</option>
+<option>Receita</option>
+<option>Consulta/Exame</option>
+<option>Entrega de Resultado</option>
+<option>Outros</option>
+</select>
+
+<textarea id="anotacoes" placeholder="Anotações"></textarea>
+
+<button class="primary" onclick="abrirAssinatura()">Assinar</button>
+<img id="preview" style="width:100%">
+
+<button class="success" onclick="finalizar()">Finalizar</button>
+</div>
+
+<!-- HISTÓRICO -->
+<div class="container" id="historicoTela" style="display:none;">
+<h2>Histórico</h2>
+<button onclick="mostrarTela('form')">Voltar</button>
+<input type="date" id="filtroData" onchange="filtrar()">
+<div id="lista"></div>
+</div>
+
+<!-- RELATÓRIO -->
+<div class="container" id="relatorioTela" style="display:none;">
+<h2>Relatório</h2>
+<button onclick="mostrarTela('form')">Voltar</button>
+<div id="relatorio"></div>
+</div>
+
+<!-- ASSINATURA -->
+<div id="assinaturaTela">
+  <div class="canvas-container">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <div class="assinatura-botoes">
+    <button onclick="limpar()">Limpar</button>
+    <button onclick="salvarAssinatura()" class="success">Salvar</button>
+    <button onclick="fechar()" class="danger">Cancelar</button>
+  </div>
+</div>
+
+<!-- MENU -->
+<div class="bottom-nav" id="menu" style="display:none;">
+<button onclick="mostrarTela('form')">Form</button>
+<button onclick="mostrarTela('historico')">Histórico</button>
+<button onclick="mostrarTela('relatorio')">Relatório</button>
+</div>
+
+<script>
+const { jsPDF } = window.jspdf;
+
+/* DEVICE */
+function getDeviceId(){
+ let id = localStorage.getItem("deviceId");
+ if(!id){
+  id = Math.random().toString(36).substring(2);
+  localStorage.setItem("deviceId", id);
+ }
+ return id;
+}
+
+/* ATIVAÇÃO */
+function ativar(){
+ let cod = codigo.value.trim();
+ let esperado = btoa(getDeviceId()+"_VISITAFACIL");
+
+ if(cod === esperado){
+  localStorage.setItem("licenciado","sim");
+  iniciar();
+ }else{
+  alert("Código inválido");
+ }
+}
+
+/* INICIAR */
+function iniciar(){
+ ativacao.style.display="none";
+
+ let info = JSON.parse(localStorage.getItem("info"));
+
+ // SEMPRE mostra a tela de abertura
+ abertura.style.display="flex";
+ formTela.style.display="none";
+ menu.style.display="none";
+ headerInfo.style.display="none";
+
+ // Se já tiver dados salvos, preenche automaticamente
+ if(info){
+  ubs.value = info.ubs || "";
+  acs.value = info.acs || "";
+  micro.value = info.micro || "";
+ }
+}
+
+/* ABRIR SISTEMA */
+function abrirSistema(){
+
+ if(!ubs.value || !acs.value || !micro.value){
+  return alert("Preencha tudo");
+ }
+
+ let info = {
+  ubs: ubs.value,
+  acs: acs.value,
+  micro: micro.value
+ };
+
+ localStorage.setItem("info", JSON.stringify(info));
+
+ abertura.style.display="none";
+ formTela.style.display="block";
+ menu.style.display="flex";
+ headerInfo.style.display="block";
+
+ headerInfo.innerHTML = `${info.ubs} | ${info.acs} | ${info.micro}`;
+}
+
+/* DATA */
+function atualizarData(){
+ datetime.value = new Date().toLocaleString("pt-BR");
+}
+
+/* CEP */
+function buscarCEP(){
+ fetch(`https://viacep.com.br/ws/${cep.value}/json/`)
+ .then(r=>r.json())
+ .then(d=> endereco.value=`${d.logradouro}, ${d.localidade}`);
+}
+
+/* MEMBRO */
+function addMembro(){
+ let i=document.createElement("input");
+ membros.appendChild(i);
+}
+
+/* ASSINATURA */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+function ajustarCanvas(){
+ const rect = canvas.parentElement.getBoundingClientRect();
+ const dpr = window.devicePixelRatio || 1;
+
+ canvas.width = rect.width * dpr;
+ canvas.height = rect.height * dpr;
+
+ ctx.setTransform(1,0,0,1,0,0);
+ ctx.scale(dpr,dpr);
+ ctx.lineWidth = 2;
+}
+
+let desenhando = false;
+
+canvas.addEventListener("pointerdown", e=>{
+ desenhando = true;
+ ctx.beginPath();
+ ctx.moveTo(e.offsetX, e.offsetY);
+});
+
+canvas.addEventListener("pointermove", e=>{
+ if(!desenhando) return;
+ ctx.lineTo(e.offsetX, e.offsetY);
+ ctx.stroke();
+});
+
+canvas.addEventListener("pointerup", ()=> desenhando = false);
+
+function abrirAssinatura(){
+ assinaturaTela.style.display="flex";
+
+ setTimeout(()=>{
+  ajustarCanvas();
+  limpar();
+ },100);
+}
+
+function limpar(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+}
+
+function salvarAssinatura(){
+ preview.src = canvas.toDataURL("image/png");
+ fechar();
+}
+
+function fechar(){
+ assinaturaTela.style.display = "none";
+}
+
+/* LIMPAR */
+function limparFormulario(){
+ document.querySelectorAll("input,textarea").forEach(i=>i.value="");
+ membros.innerHTML="";
+ preview.src="";
+}
+
+/* FINALIZAR */
+function finalizar(){
+ let info = JSON.parse(localStorage.getItem("info"));
+
+ let agora=new Date();
+ let dataLocal = agora.toISOString().split("T")[0];
+
+ let dados={
+  ...info,
+  id:Date.now(),
+  dataFiltro:dataLocal,
+  dataBR:agora.toLocaleString("pt-BR"),
+  endereco:endereco.value,
+  numero:numero.value,
+  complemento:complemento.value,
+  responsavel:responsavel.value,
+  motivo:motivo.value,
+  anotacoes:anotacoes.value,
+  assinatura:preview.src,
+  membros:[...document.querySelectorAll("#membros input")].map(i=>i.value)
+ };
+
+ let hist=JSON.parse(localStorage.getItem("visitas")||"[]");
+ hist.push(dados);
+ localStorage.setItem("visitas",JSON.stringify(hist));
+
+ gerarPDF(dados);
+ limparFormulario();
+ alert("Salvo");
+}
+
+/* PDF */
+function gerarPDF(d){
+ const doc = new jsPDF();
+ let y = 15;
+
+ // TÍTULO
+ doc.setFontSize(16);
+ doc.text("Visita Domiciliar",105,10,{align:"center"});
+
+ // CABEÇALHO
+ doc.setFontSize(10);
+ doc.text(`UBS: ${d.ubs}`,10,20);
+ doc.text(`ACS: ${d.acs}`,10,25);
+ doc.text(`Micro área: ${d.micro}`,10,30);
+
+ y = 40;
+
+ function linha(titulo, valor){
+  doc.setFont(undefined,"bold");
+  doc.text(titulo,10,y);
+
+  doc.setFont(undefined,"normal");
+  let linhas = doc.splitTextToSize(valor || "-",180);
+
+  y+=5;
+  doc.text(linhas,10,y);
+
+  y += linhas.length * 6 + 2;
+
+  // linha divisória
+  doc.line(10,y,200,y);
+  y+=5;
+ }
+
+ linha("Data:", d.dataBR);
+ linha("Responsável:", d.responsavel);
+ linha("Endereço:", `${d.endereco}, Nº ${d.numero} ${d.complemento || ""}`);
+ linha("Motivo:", d.motivo);
+ linha("Anotações:", d.anotacoes);
+
+ if(d.membros && d.membros.length){
+  linha("Membros:", d.membros.join(", "));
+ }
+
+ if(d.assinatura){
+  doc.text("Assinatura:",10,y);
+  y+=5;
+  doc.addImage(d.assinatura,"PNG",10,y,80,30);
+ }
+
+ doc.save((d.responsavel || "visita") + ".pdf");
+}
+
+/* HISTÓRICO */
+function filtrar(){
+ let data=filtroData.value;
+ let dados=JSON.parse(localStorage.getItem("visitas")||"[]");
+ listar(!data?dados:dados.filter(v=>v.dataFiltro===data));
+}
+
+function listar(dados){
+ lista.innerHTML="";
+ dados.forEach(d=>{
+  lista.innerHTML+=`
+  <div class="card">
+  ${d.dataBR}<br>${d.responsavel}
+  <button onclick='gerarPDF(${JSON.stringify(d)})'>PDF</button>
+  </div>`;
+ });
+}
+
+/* RELATÓRIO */
+function gerarRelatorio(){
+ let dados=JSON.parse(localStorage.getItem("visitas")||"[]");
+ relatorio.innerHTML="Total: "+dados.length;
+}
+
+/* NAV */
+function mostrarTela(t){
+ formTela.style.display="none";
+ historicoTela.style.display="none";
+ relatorioTela.style.display="none";
+
+ if(t==="form") formTela.style.display="block";
+ if(t==="historico"){historicoTela.style.display="block"; filtrar();}
+ if(t==="relatorio"){relatorioTela.style.display="block"; gerarRelatorio();}
+}
+
+/* LOAD */
+window.onload=()=>{
+ deviceId.innerText=getDeviceId();
+
+ if(!localStorage.getItem("licenciado")){
+  ativacao.style.display="flex";
+ }else{
+  iniciar();
+ }
+
+ setInterval(atualizarData,1000);
+};
+</script>
+
+</body>
+</html>
