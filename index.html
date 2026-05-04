@@ -447,6 +447,14 @@ function getPos(e){
  };
 }
 
+function getPos(e){
+ const rect = canvas.getBoundingClientRect();
+ return {
+  x: e.clientX - rect.left,
+  y: e.clientY - rect.top
+ };
+}
+
 canvas.addEventListener("pointerdown", e=>{
  desenhando = true;
  const p = getPos(e);
@@ -461,9 +469,8 @@ canvas.addEventListener("pointermove", e=>{
  ctx.stroke();
 });
 
-canvas.addEventListener("pointerup", ()=> desenhando = false);
-
-canvas.addEventListener("pointerup", ()=> desenhando = false);
+canvas.addEventListener("pointerup", ()=> desenhando=false);
+canvas.addEventListener("pointerleave", ()=> desenhando=false);
 
 function abrirAssinatura(){
  assinaturaTela.style.display="flex";
