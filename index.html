@@ -439,17 +439,29 @@ function ajustarCanvas(){
 
 let desenhando = false;
 
+function getPos(e){
+ const rect = canvas.getBoundingClientRect();
+ return {
+  x: e.clientX - rect.left,
+  y: e.clientY - rect.top
+ };
+}
+
 canvas.addEventListener("pointerdown", e=>{
  desenhando = true;
+ const p = getPos(e);
  ctx.beginPath();
- ctx.moveTo(e.offsetX, e.offsetY);
+ ctx.moveTo(p.x, p.y);
 });
 
 canvas.addEventListener("pointermove", e=>{
  if(!desenhando) return;
- ctx.lineTo(e.offsetX, e.offsetY);
+ const p = getPos(e);
+ ctx.lineTo(p.x, p.y);
  ctx.stroke();
 });
+
+canvas.addEventListener("pointerup", ()=> desenhando = false);
 
 canvas.addEventListener("pointerup", ()=> desenhando = false);
 
