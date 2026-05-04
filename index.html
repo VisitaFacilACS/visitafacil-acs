@@ -172,6 +172,7 @@ position:fixed;bottom:0;width:100%;display:flex;background:#000;
 #canvas{
  width:100%;
  height:100%;
+ touch-action:none; /* ESSENCIAL */
 }
 
 .assinatura-botoes{
@@ -335,6 +336,10 @@ position:fixed;bottom:0;width:100%;display:flex;background:#000;
 </div>
 
 <script>
+
+let lastX = 0;
+let lastY = 0;
+
 const { jsPDF } = window.jspdf;
 
 /* DEVICE */
@@ -435,6 +440,8 @@ function ajustarCanvas(){
  ctx.setTransform(1,0,0,1,0,0);
  ctx.scale(dpr,dpr);
  ctx.lineWidth = 2;
+ ctx.lineCap = "round";
+ ctx.lineJoin = "round";
 }
 
 let desenhando = false;
@@ -447,29 +454,40 @@ function getPos(e){
  };
 }
 
-function getPos(e){
- const rect = canvas.getBoundingClientRect();
- return {
-  x: e.clientX - rect.left,
-  y: e.clientY - rect.top
- };
-}
-
 canvas.addEventListener("pointerdown", e=>{
+ e.preventDefault();
  desenhando = true;
+
  const p = getPos(e);
+
+ lastX = p.x;
+ lastY = p.y;
+
  ctx.beginPath();
- ctx.moveTo(p.x, p.y);
+ ctx.moveTo(lastX, lastY);
 });
 
 canvas.addEventListener("pointermove", e=>{
  if(!desenhando) return;
+ e.preventDefault();
+
  const p = getPos(e);
- ctx.lineTo(p.x, p.y);
+
+ const midX = (lastX + p.x) / 2;
+ const midY = (lastY + p.y) / 2;
+
+ const pressure = e.pressure || 0.5;
+ ctx.lineWidth = 1 + (pressure * 3);
+
+ ctx.quadraticCurveTo(lastX, lastY, midX, midY);
  ctx.stroke();
+
+ lastX = p.x;
+ lastY = p.y;
 });
 
 canvas.addEventListener("pointerup", ()=> desenhando=false);
+canvas.addEventListener("pointercancel", ()=> desenhando=false);
 canvas.addEventListener("pointerleave", ()=> desenhando=false);
 
 function abrirAssinatura(){
@@ -486,7 +504,22 @@ function limpar(){
 }
 
 function salvarAssinatura(){
- preview.src = canvas.toDataURL("image/png");
+
+ const tempCanvas = document.createElement("canvas");
+ const tempCtx = tempCanvas.getContext("2d");
+
+ tempCanvas.width = canvas.width;
+ tempCanvas.height = canvas.height;
+
+ // FUNDO BRANCO
+ tempCtx.fillStyle = "#fff";
+ tempCtx.fillRect(0,0,tempCanvas.width,tempCanvas.height);
+
+ // desenha assinatura por cima
+ tempCtx.drawImage(canvas,0,0);
+
+ preview.src = tempCanvas.toDataURL("image/png");
+
  fechar();
 }
 
