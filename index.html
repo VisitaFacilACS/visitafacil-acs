@@ -513,6 +513,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{
  gap:12px;
  margin-bottom:15px;
 }
+
+.card div button{
+ flex:1;
+}
 </style>
 </head>
 
@@ -561,13 +565,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
     <input id="datetime" readonly>
 
-    <input id="cep" placeholder="CEP">
+    <input id="cep" placeholder="CEP" inputmode="numeric" pattern="[0-9]*">
     <button class="btn-outline" onclick="buscarCEP()">Buscar CEP</button>
 
     <input id="endereco" placeholder="Endereço">
 
     <div class="row">
-      <input id="numero" placeholder="Número">
+      <input 
+  id="numero" 
+  placeholder="Número"
+  inputmode="numeric"
+  pattern="[0-9]*"
+  oninput="this.value=this.value.replace(/\D/g,'')"
+>
       <input id="complemento" placeholder="Complemento">
     </div>
 
@@ -598,7 +608,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <!-- HISTÓRICO -->
 <div class="container" id="historicoTela" style="display:none;">
-<h2>Histórico</h2>
+<h2>Histórico de Visitas</h2>
 
 <button class="btn-gray" onclick="mostrarTela('form')">Voltar</button>
 <div class="campo-data">
@@ -612,7 +622,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 <!-- RELATÓRIO -->
 <div class="container" id="relatorioTela" style="display:none;">
 <div class="topo-relatorio">
-  <h2>Relatório</h2>
+  <h2>Relatório de Visitas</h2>
   <button class="btn-gray" onclick="mostrarTela('form')">Voltar</button>
 </div>
 <div id="relatorio"></div>
@@ -943,11 +953,17 @@ function filtrar(){
 
 function listar(dados){
  lista.innerHTML="";
+
  dados.forEach(d=>{
   lista.innerHTML+=`
   <div class="card">
-  ${d.dataBR}<br>${d.responsavel}
-  <button class="btn-blue" onclick='gerarPDF(${JSON.stringify(d)})'>📄 PDF</button>
+    ${d.dataBR}<br>${d.responsavel}
+
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <button class="btn-blue" onclick='gerarPDF(${JSON.stringify(d)})'>📄 PDF</button>
+      <button class="danger" onclick='excluir(${d.id})'>🗑 Excluir</button>
+    </div>
+
   </div>`;
  });
 }
@@ -1011,6 +1027,20 @@ window.onload=()=>{
 
  setInterval(atualizarData,1000);
 };
+
+function excluir(id){
+
+ if(!confirm("Deseja realmente excluir esta visita?")) return;
+
+ let dados = JSON.parse(localStorage.getItem("visitas") || "[]");
+
+ dados = dados.filter(v => v.id !== id);
+
+ localStorage.setItem("visitas", JSON.stringify(dados));
+
+ filtrar(); // atualiza a tela
+}
+
 </script>
 
 </body>
