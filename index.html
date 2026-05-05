@@ -48,19 +48,22 @@ button{
 
 /* ABERTURA (layout vertical bonito) */
 #abertura{
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-background:linear-gradient(135deg,#007bff,#28a745);
-z-index:9999;
-padding:20px;
-color:#fff;
-text-align:center;
-gap:10px;
+ position:fixed;
+ top:0;
+ left:0;
+ width:100%;
+ height:100%;
+
+ display:flex;
+ flex-direction:column;
+
+ justify-content:center;
+ align-items:center;
+
+ background:linear-gradient(135deg,#007bff,#28a745);
+
+ padding:20px;
+ box-sizing:border-box;
 }
 
 #abertura input{
@@ -517,6 +520,38 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 .card div button{
  flex:1;
 }
+
+.box-abertura{
+ width:100%;
+ max-width:320px;
+
+ background:#fff;
+ padding:25px;
+ border-radius:18px;
+
+ box-shadow:0 10px 30px rgba(0,0,0,0.2);
+
+ display:flex;
+ flex-direction:column;
+ gap:12px;
+
+ text-align:center;
+}
+
+.logo-abertura{
+ width:180px;
+ margin:0 auto 10px;
+}
+
+.box-abertura{
+ animation:fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn{
+ from{opacity:0; transform:translateY(20px);}
+ to{opacity:1; transform:translateY(0);}
+}
+
 </style>
 </head>
 
@@ -540,13 +575,19 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <!-- ABERTURA -->
 <div id="abertura" style="display:none;">
-<img src="logo.png" width="250">
 
-<input id="ubs" placeholder="Nome da UBS">
-<input id="acs" placeholder="Nome do ACS">
-<input id="micro" placeholder="Micro área">
+  <div class="box-abertura">
 
-<button onclick="abrirSistema()">Entrar no Sistema</button>
+    <img src="logo.png" class="logo-abertura">
+
+    <input id="ubs" placeholder="Nome da UBS">
+    <input id="acs" placeholder="Nome do ACS">
+    <input id="micro" placeholder="Micro área">
+
+    <button onclick="abrirSistema()">Entrar no Sistema</button>
+
+  </div>
+
 </div>
 
 <!-- HEADER -->
@@ -953,6 +994,9 @@ function filtrar(){
 
 function listar(dados){
  lista.innerHTML="";
+ 
+ // 🔥 ORDENA DO MAIS RECENTE PARA O MAIS ANTIGO
+ dados.sort((a,b) => b.id - a.id);
 
  dados.forEach(d=>{
   lista.innerHTML+=`
