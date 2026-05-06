@@ -539,6 +539,13 @@ input[type="date"]::-webkit-calendar-picker-indicator{
  box-shadow:0 4px 12px rgba(0,123,255,0.25);
 }
 
+.btn-reset{
+ background:none;
+ color:#888;
+ font-size:12px;
+ margin-top:5px;
+}
+
 </style>
 </head>
 
@@ -572,6 +579,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{
     <input id="micro" placeholder="Micro área">
 
     <button onclick="abrirSistema()">Entrar no Sistema</button>
+	<!-- 👇 COLE EXATAMENTE AQUI -->
+  <button id="btnReset" onclick="resetarDados()" class="btn-reset" style="display:none;">
+    ⚠️ Redefinir cadastro
+  </button>
 
   </div>
 
@@ -732,10 +743,34 @@ function iniciar(){
  headerInfo.style.display="none";
 
  // Se já tiver dados salvos, preenche automaticamente
- if(info){
-  ubs.value = info.ubs || "";
-  acs.value = info.acs || "";
-  micro.value = info.micro || "";
+if(info){
+ ubs.value = info.ubs || "";
+ acs.value = info.acs || "";
+ micro.value = info.micro || "";
+
+ bloquearCamposAbertura(); // 🔥 AQUI
+  // 👇 MOSTRA O BOTÃO
+  btnReset.style.display = "block";
+}
+}
+
+function bloquearCamposAbertura(){
+ ubs.readOnly = true;
+ acs.readOnly = true;
+ micro.readOnly = true;
+
+ ubs.style.opacity = "0.7";
+ acs.style.opacity = "0.7";
+ micro.style.opacity = "0.7";
+}
+
+/* RESETAR DADOS */
+function resetarDados(){
+ if(confirm("Tem certeza que deseja redefinir os dados? Isso apagará as informações da UBS, ACS e Micro área.")){
+  
+  localStorage.removeItem("info");
+  location.reload(); // reinicia o app
+
  }
 }
 
@@ -753,6 +788,7 @@ function abrirSistema(){
  };
 
  localStorage.setItem("info", JSON.stringify(info));
+ bloquearCamposAbertura();
 
  abertura.style.display="none";
  formTela.style.display="block";
