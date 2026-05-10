@@ -872,24 +872,44 @@ const DIAS_TESTE = 3;
 
 /* DEVICE */
 function getDeviceId(){
+
  let id = localStorage.getItem("deviceId");
+
  if(!id){
-  id = Math.random().toString(36).substring(2);
+
+  id =
+   navigator.userAgent +
+   screen.width +
+   screen.height +
+   new Date().getTimezoneOffset();
+
+  id = btoa(id).substring(0,25);
+
   localStorage.setItem("deviceId", id);
  }
+
  return id;
 }
 
 /* ATIVAÇÃO */
 function ativar(){
+
  let cod = codigo.value.trim();
+
  let esperado = btoa(getDeviceId()+"_VISITAFACIL");
 
  if(cod === esperado){
+
   localStorage.setItem("licenciado","sim");
+
+  alert("Sistema ativado com sucesso!");
+
   iniciar();
+
  }else{
+
   alert("Código inválido");
+
  }
 }
 
