@@ -759,13 +759,9 @@ input[type="date"]::-webkit-calendar-picker-indicator{
 
 <button onclick="ativar()">Ativar</button>
 
-<a
- href="https://wa.me/5528999812471?text=Olá,%20finalizei%20o%20teste%20do%20VisitaFácil%20ACS%20e%20quero%20comprar%20a%20licença.%20Segue%20meu%20ID:%20"
- target="_blank"
- class="btn-whats">
-
+<button class="btn-whats" onclick="comprarLicenca()">
 💬 Comprar Licença
-</a>
+</button>
 
 </div>
 </div>
@@ -1409,6 +1405,20 @@ window.addEventListener("load", ()=>{
  },3500);
 
 });
+
+function comprarLicenca(){
+
+ let id = getDeviceId();
+
+ let msg =
+ `Olá, finalizei o teste do App VisitaFácil ACS e quero ativar a versão completa.%0A%0A` +
+ `Meu ID do aparelho é:%0A${id}`;
+
+ let url =
+ `https://wa.me/5528999812471?text=${msg}`;
+
+ window.open(url, "_blank");
+}
 
 </script>
 
